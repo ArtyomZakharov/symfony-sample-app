@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
+ * TODO: Add many-to-many relation with genres
+ *
  * Artist
  *
  * @ORM\Table(name="artists")
