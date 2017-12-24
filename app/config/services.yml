@@ -33,3 +33,61 @@ services:
     # AppBundle\Service\ExampleService:
     #     arguments:
     #         $someArgument: 'some_value'
+
+    app.response_formatter:
+        class: AppBundle\Response\Formatter
+        arguments: ["@router"]
+
+    app.artist_repository:
+        class: AppBundle\Repository\ArtistRepository
+
+    app.genre_repository:
+        class: AppBundle\Repository\GenreRepository
+
+    app.song_repository:
+        class: AppBundle\Repository\SongRepository
+
+    app.artist_viewmodel_creator:
+        class: AppBundle\View\Creator\ArtistCreator
+
+    app.genre_viewmodel_creator:
+        class: AppBundle\View\Creator\GenreCreator
+
+    app.song_viewmodel_creator:
+        class: AppBundle\View\Creator\SongCreator
+
+    app.artist_finder:
+        class: AppBundle\Finder\ArtistFinder
+        arguments: ["@app.artist_repository", "@app.artist_viewmodel_creator"]
+        calls:
+            - [setRouter, ["@router"]]
+            - [setResponseFormatter, ["@app.response_formatter"]]
+
+    app.genre_finder:
+        class: AppBundle\Finder\GenreFinder
+        arguments: ["@app.genre_repository", "@app.genre_viewmodel_creator"]
+        calls:
+            - [setRouter, ["@router"]]
+            - [setResponseFormatter, ["@app.response_formatter"]]
+
+    app.song_finder:
+        class: AppBundle\Finder\SongFinder
+        arguments: ["@app.song_repository", "@app.song_viewmodel_creator"]
+        calls:
+            - [setRouter, ["@router"]]
+            - [setResponseFormatter, ["@app.response_formatter"]]
+
+    app.artist_service:
+        class: AppBundle\Service\ArtistService
+        calls:
+            - [setEntityManager, ["@doctrine.orm.entity_manager"]]
+
+    app.genre_service:
+        class: AppBundle\Service\GenreService
+        calls:
+            - [setEntityManager, ["@doctrine.orm.entity_manager"]]
+
+    app.song_service:
+        class: AppBundle\Service\SongService
+        calls:
+            - [setEntityManager, ["@doctrine.orm.entity_manager"]]
