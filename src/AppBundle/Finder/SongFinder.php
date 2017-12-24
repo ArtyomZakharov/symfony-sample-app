@@ -7,6 +7,7 @@ use AppBundle\Pagination\Pagination;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use AppBundle\Finder\Traits\{RouterTrait, ResponseFormatterTrait};
+use AppBundle\Utils\DateTimeUtils;
 
 class SongFinder extends AbstractFinder
 {
@@ -35,13 +36,15 @@ class SongFinder extends AbstractFinder
 
         $repo = $this->repository;
 
-        $total = $repo->countAll();
+        $criteria = $this->getFilteringCriteria($request);
+
+        $total = $repo->countAll($criteria);
 
         if ($total) {
             $pagination = new Pagination($page, $limit, $total);
             $pages = $pagination->calculatePages();
 
-            $songs = $repo->getAll($limit, $pagination->calculateOffset());
+            $songs = $repo->getAll($criteria, $limit, $pagination->calculateOffset());
             $songs = $this->viewModelCreator->createFromArray($songs, $context);
         }
 
@@ -63,5 +66,43 @@ class SongFinder extends AbstractFinder
         $this->entity = $song;
 
         return $this;
+    }
+
+    // TODO: find better way to get this
+    private function getFilteringCriteria(Request $request): array
+    {
+        $criteria = [];
+
+        $artistId = $request->query->get('artist_id');
+        if ($artistId && $artistId !== 'null') {
+            $criteria[] = [
+                'match_type' => 'exact',
+                'name' => 'artist',
+                'value' => $artistId
+            ];
+        }
+
+        $genreId = $request->query->get('genre_id');
+        if ($artistId && $artistId !== 'null') {
+            $criteria[] = [
+                'match_type' => 'exact',
+                'name' => 'genre',
+                'value' => $genreId
+            ];
+        }
+
+        $year = $request->query->get('year');
+        if ($year && $year !== 'null') {
+            $criteria[] = [
+                'match_type' => 'between',
+                'name' => 'releaseDate',
+                'value' => [
+                    'from' => DateTimeUtils::getYearBeginning($year),
+                    'to' => DateTimeUtils::getYearEnd($year)
+                ]
+            ];
+        }
+
+        return $criteria;
     }
 }
