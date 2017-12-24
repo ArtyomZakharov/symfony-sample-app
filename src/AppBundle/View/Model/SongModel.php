@@ -6,7 +6,6 @@ use AppBundle\View\Creator\SongCreator;
 
 class SongModel extends AbstractModel
 {
-    // const CONTEXT_SONG = 'song';
     const CONTEXT_LIST = 'list';
 
     /**
@@ -32,7 +31,7 @@ class SongModel extends AbstractModel
             default:
                 $data = [
                     'id' => $entity->getId(),
-                    'name' => $entity->getName()
+                    'title' => $entity->getTitle()
                 ];
 
         }
