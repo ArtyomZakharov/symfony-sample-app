@@ -6,6 +6,27 @@
 GET /api/v1/songs
 ```
 
+### Request
+
+Parameters
+
+_Feel free to pass any combination of following parameters (as GET variables)._
+
+Filtering related
+
+ Name         | Type   | Description
+--------------|--------|-------------
+ artist_id    | int    | Artist ID
+ genre_id     | int    | Genre ID
+ year         | int    | Release year
+
+Ordering related
+
+ Name         | Type   | Description
+--------------|--------|-------------
+ field        | string | Possible values are `artist`, `genre`, `year`, `title`
+ direction    | string | `ASC` or `DESC`
+
 ### Response
 
 Possible codes

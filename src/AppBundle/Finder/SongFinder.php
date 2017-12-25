@@ -36,7 +36,8 @@ class SongFinder extends AbstractFinder
 
         $repo = $this->repository;
 
-        $criteria = $this->getFilteringCriteria($request);
+        $filterBy = $this->getFilteringCriteria($request);
+        $orderBy = $this->getOrderingCriteria($request);
 
         $total = $repo->countAll($criteria);
 
@@ -44,7 +45,7 @@ class SongFinder extends AbstractFinder
             $pagination = new Pagination($page, $limit, $total);
             $pages = $pagination->calculatePages();
 
-            $songs = $repo->getAll($criteria, $limit, $pagination->calculateOffset());
+            $songs = $repo->getAll($filterBy, $orderBy, $limit, $pagination->calculateOffset());
             $songs = $this->viewModelCreator->createFromArray($songs, $context);
         }
 
@@ -66,6 +67,14 @@ class SongFinder extends AbstractFinder
         $this->entity = $song;
 
         return $this;
+    }
+
+    private function getOrderingCriteria(Request $request): array
+    {
+        return [
+            'field' => $request->query->get('orderBy'),
+            'direction' => $request->query->get('orderDirection')
+        ];
     }
 
     // TODO: find better way to get this

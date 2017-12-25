@@ -2,7 +2,9 @@
 
 namespace AppBundle\Repository;
 
-class SongRepository extends \Doctrine\ORM\EntityRepository
+use Doctrine\ORM\{EntityRepository, QueryBuilder};
+
+class SongRepository extends EntityRepository
 {
     public function countAll(string $criteria = []): int
     {
@@ -16,22 +18,52 @@ class SongRepository extends \Doctrine\ORM\EntityRepository
         return $qb->getQuery()->getSingleScalarResult();
     }
 
-    public function getAll(array $criteria = [], int $limit = null, int $offset = null): array
+    public function getAll(array $filterBy = [], array $orderBy = [],
+        int $limit = null, int $offset = null): array
     {
         $qb = $this->createQueryBuilder('s');
 
-        list($where, $params) = $this->getWhereAndParams($criteria);
+        list($where, $params) = $this->getWhereAndParams($filterBy);
         if ($where && $params) {
             $qb->where($where)->setParameters($params);
         }
 
-        return $qb->setFirstResult($offset)
+        return $this->applyOrdering($qb, $orderBy)
+            ->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()
             ->getArrayResult();
     }
 
-    public function getWhereAndParams(array $criteria): array
+    public function applyOrdering(QueryBuilder $qb, array $orderBy): QueryBuilder
+    {
+        switch ($orderBy['field']) {
+            case 'artist':
+                $qb->join('s.artist', 'a', 'a.id = s.artist');
+                $field = 'a.name';
+                break;
+
+            case 'genre':
+                $qb->join('s.genre', 'g', 'g.id = s.genre');
+                $field = 'g.title';
+                break;
+
+            case 'year':
+                $field = 's.releaseDate';
+                break;
+
+            case 'title':
+                $field = 's.title';
+                break;
+
+            default:
+                $field = 's.id';
+        }
+
+        return $qb->orderBy($field, $orderBy['direction'] ?: 'ASC');
+    }
+
+    private function getWhereAndParams(array $criteria): array
     {
         // TODO: get rid of this horrible part
         $conditions = [];
