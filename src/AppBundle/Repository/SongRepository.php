@@ -6,24 +6,26 @@ class SongRepository extends \Doctrine\ORM\EntityRepository
 {
     public function countAll(string $criteria = []): int
     {
-        list($where, $params) = $this->getWhereAndParams($criteria);
+        $qb = $this->createQueryBuilder('s')->select('count(s.id)');
 
-        return $this->createQueryBuilder('s')
-            ->select('count(s.id)')
-            ->where($where)
-            ->setParameters($params)
-            ->getQuery()
-            ->getSingleScalarResult();
+        list($where, $params) = $this->getWhereAndParams($criteria);
+        if ($where && $params) {
+            $qb->where($where)->setParameters($params);
+        }
+
+        return $qb->getQuery()->getSingleScalarResult();
     }
 
     public function getAll(array $criteria = [], int $limit = null, int $offset = null): array
     {
-        list($where, $params) = $this->getWhereAndParams($criteria);
+        $qb = $this->createQueryBuilder('s');
 
-        return $this->createQueryBuilder('s')
-            ->where($where)
-            ->setParameters($params)
-            ->setFirstResult($offset)
+        list($where, $params) = $this->getWhereAndParams($criteria);
+        if ($where && $params) {
+            $qb->where($where)->setParameters($params);
+        }
+
+        return $qb->setFirstResult($offset)
             ->setMaxResults($limit)
             ->getQuery()
             ->getArrayResult();
